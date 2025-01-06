@@ -1,0 +1,8 @@
+/home/gustavo/aws-cloud - Copy/src/main/java/fr/emse/sqs/SendMessage.java
+/home/gustavo/aws-cloud - Copy/src/main/java/fr/emse/lambda/SummarizeWorker.java
+/home/gustavo/aws-cloud - Copy/src/main/java/fr/emse/ec2/CreateEC2Instance.java
+/home/gustavo/aws-cloud - Copy/src/main/java/fr/emse/ec2/ManageEC2Instance.java
+/home/gustavo/aws-cloud - Copy/src/main/java/fr/emse/sns/PublishTopic.java
+/home/gustavo/aws-cloud - Copy/src/main/java/fr/emse/s3/UploadClient.java
+/home/gustavo/aws-cloud - Copy/src/main/java/fr/emse/sqs/SQSMessageProcessor.java
+/home/gustavo/aws-cloud - Copy/src/main/java/fr/emse/sns/HandleSNSEvent.java
