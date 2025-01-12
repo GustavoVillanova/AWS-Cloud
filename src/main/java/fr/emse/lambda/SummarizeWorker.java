@@ -8,6 +8,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -19,26 +21,23 @@ import java.util.Map;
 
 public class SummarizeWorker implements RequestHandler<SQSEvent, Void> {
 
-    private static final String OUTPUT_BUCKET = "mybucket00000000000000"; // Substitua pelo nome do bucket de saída
+    private static final String OUTPUT_BUCKET = "mybucket0000000000"; 
     private static final S3Client s3Client = S3Client.builder()
-            .region(Region.US_EAST_1) // Altere para a região do seu bucket
+            .region(Region.US_EAST_1) 
             .build();
 
     @Override
     public Void handleRequest(SQSEvent event, Context context) {
         for (SQSEvent.SQSMessage msg : event.getRecords()) {
             try {
-                // Extrai o nome do bucket e a chave do objeto da mensagem SQS
+                
                 String bucketName = msg.getBody().split("\"name\":\"")[1].split("\"")[0];
                 String objectKey = msg.getBody().split("\"key\":\"")[1].split("\"")[0];
 
-                // Lê o arquivo CSV do S3
                 String csvContent = readCsvFromS3(bucketName, objectKey);
 
-                // Processa os dados do CSV
                 Map<String, Map<LocalDate, Summary>> summaries = processCsv(csvContent);
 
-                // Salva os resultados no S3
                 saveSummariesToS3(summaries, objectKey);
             } catch (Exception e) {
                 context.getLogger().log("Erro ao processar mensagem: " + e.getMessage());
@@ -70,17 +69,17 @@ public class SummarizeWorker implements RequestHandler<SQSEvent, Void> {
         Map<String, Map<LocalDate, Summary>> summaries = new HashMap<>();
 
         try (BufferedReader reader = new BufferedReader(new java.io.StringReader(csvContent))) {
-            Iterable<org.apache.commons.csv.CSVRecord> records = org.apache.commons.csv.CSVFormat.DEFAULT
+            Iterable<CSVRecord> records = CSVFormat.DEFAULT
                     .withFirstRecordAsHeader()
                     .parse(reader);
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy hh:mm:ss a");
 
-            for (org.apache.commons.csv.CSVRecord record : records) {
+            for (CSVRecord record : records) {
                 String srcIp = record.get("Src IP");
                 String dstIp = record.get("Dst IP");
                 String timestamp = record.get("Timestamp");
-                LocalDate date = LocalDate.parse(timestamp, formatter); // Converte o timestamp para LocalDate
+                LocalDate date = LocalDate.parse(timestamp, formatter);
                 long flowDuration = Long.parseLong(record.get("Flow Duration"));
                 long totFwdPkts = Long.parseLong(record.get("Tot Fwd Pkts"));
 

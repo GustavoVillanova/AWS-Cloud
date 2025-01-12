@@ -1,0 +1,6 @@
+fr/emse/lambda/SummarizeWorker$Summary.class
+fr/emse/s3/UploadClient.class
+fr/emse/export/ExportClient.class
+fr/emse/ec2/ConsolidatorWorker$Metrics.class
+fr/emse/lambda/SummarizeWorker.class
+fr/emse/ec2/ConsolidatorWorker.class

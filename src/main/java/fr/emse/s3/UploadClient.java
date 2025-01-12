@@ -12,37 +12,56 @@ import java.nio.file.Paths;
 public class UploadClient {
 
     public static void main(String[] args) {
-        // Nome do bucket S3
-        String bucketName = "mybucket00000000000000";
+        String bucketName = "mybucket0000000000";
 
-        // Caminho do arquivo CSV local
-        String filePath = "/home/gustavo/aws-cloud - Copy/data-20221207.csv";
+        String folderPath = "/home/gustavo/aws-cloud - Copy/base";
 
-        // Extrai o nome do arquivo do caminho local
-        String fileName = new File(filePath).getName();
-
-        // Cria o cliente S3
         S3Client s3Client = S3Client.builder()
-                .region(Region.US_EAST_1) // Altere para a região do seu bucket
+                .region(Region.US_EAST_1) 
                 .credentialsProvider(ProfileCredentialsProvider.create())
                 .build();
 
-        // Faz o upload do arquivo
-        uploadFileToS3(s3Client, bucketName, fileName, filePath);
+        uploadFolderToS3(s3Client, bucketName, folderPath, "input/");
 
-        // Fecha o cliente S3
         s3Client.close();
+    }
+
+    public static void uploadFolderToS3(S3Client s3Client, String bucketName, String folderPath, String targetFolder) {
+        File folder = new File(folderPath);
+
+        if (!folder.exists() || !folder.isDirectory()) {
+            System.err.println("O caminho especificado não é uma pasta válida: " + folderPath);
+            return;
+        }
+
+        File[] files = folder.listFiles();
+        if (files == null || files.length == 0) {
+            System.out.println("Nenhum arquivo encontrado na pasta: " + folderPath);
+            return;
+        }
+
+        for (File file : files) {
+            if (file.isFile()) {
+                String fileName = file.getName();
+                String filePath = file.getAbsolutePath();
+                String s3Key = targetFolder + fileName;
+                try {
+                    uploadFileToS3(s3Client, bucketName, s3Key, filePath);
+                } catch (Exception e) {
+                    System.err.println("Erro ao enviar o arquivo " + fileName + ": " + e.getMessage());
+                }
+            }
+        }
     }
 
     public static void uploadFileToS3(S3Client s3Client, String bucketName, String s3Key, String filePath) {
         try {
-            // Cria a requisição de upload
+            
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
-                    .key(s3Key) // Usa o nome do arquivo como chave no S3
+                    .key(s3Key)
                     .build();
 
-            // Faz o upload do arquivo
             s3Client.putObject(putObjectRequest, Paths.get(filePath));
 
             System.out.println("Arquivo " + filePath + " enviado com sucesso para " + bucketName + "/" + s3Key);
